@@ -26,7 +26,7 @@ function oc_bookmarks_restore_run()
         $result = $query->execute();
         $num_updated = 0;
         if (isset($result['user'])) {
-          $All_Users = array_keys($result['node']);
+          $All_Users = array_keys($result['user']);
           
           foreach($All_Users as $uid)
           {
