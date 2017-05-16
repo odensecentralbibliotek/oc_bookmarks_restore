@@ -47,6 +47,12 @@ function oc_bookmarks_restore_run()
 }
 function oc_bookmarks_update_bookmarks($old_uid,$new_uid)
 {
+    $query = db_select('user', 'n')
+      ->condition('n.uid', $old_uid, '=')
+      ->fields('n', array('uid'))
+      ->execute();
+      return $num = $query->rowCount();
+    /*
     $num_updated = db_update('flag_content')
     ->fields(array(
       'uid' => $new_uid,
@@ -54,5 +60,5 @@ function oc_bookmarks_update_bookmarks($old_uid,$new_uid)
     ->condition('uid',$old_uid, '=')
     ->execute();
     
-    return $num_updated;
+    return $num_updated;*/
 }
