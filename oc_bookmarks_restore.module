@@ -30,9 +30,10 @@ function oc_bookmarks_restore_run()
           
           foreach($All_Users as $uid)
           {
+              echo "updating bookmarks:" . $uid . "\n";
               if($user->uid != $uid)
               {
-                  echo "updating bookmarks:" . $uid . "\n";
+                  
                  $num_updated += oc_bookmarks_restore_update_bookmarks($uid,$user->uid);
               }
           }
