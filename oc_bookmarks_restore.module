@@ -1,0 +1,58 @@
+<?php
+
+/* 
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/**
+ * Implements hook_menu().
+ *
+ * Adds the charting result page on each Webform node.
+ */
+function oc_bookmarks_restore_menu() {
+ $items['oc/bookmarks/restore/'] = array(
+    'page callback' => 'oc_bookmarks_restore_run', // Render HTML
+    'description' => 'Attempts to restore a users bookmarks after migrate to 5.5',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+   );
+  return $items;
+}
+function oc_bookmarks_restore_run()
+{
+    global $user;
+    if(isset($user->mail) && !empty($user->mail))
+    {
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'user')
+        ->propertyCondition('mail', $user->mail);
+
+        $result = $query->execute();
+        $num_updated = 0;
+        if (isset($result['node'])) {
+          $All_Users = array_keys($result['node']);
+          
+          foreach($All_Users as $uid)
+          {
+              if($user->uid != $uid)
+              {
+                 $num_updated += oc_bookmarks_update_bookmarks($uid,$user->uid);
+              }
+          }
+        }
+        echo "Restored:" . $num_updated . " for:". $user->uid;
+    }
+}
+function oc_bookmarks_update_bookmarks($old_uid,$new_uid)
+{
+    $num_updated = db_update('flag_content')
+    ->fields(array(
+      'uid' => $new_uid,
+    ))
+    ->condition('uid',$old_uid, '=')
+    ->execute();
+    
+    return $num_updated;
+}
