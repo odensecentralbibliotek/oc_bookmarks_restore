@@ -42,7 +42,7 @@ function oc_bookmarks_restore_run()
 }
 function oc_bookmarks_restore_update_bookmarks($old_uid,$new_uid)
 {
-    $query = db_select('user', 'n')
+    $query = db_select('flag_content', 'n')
       ->condition('n.uid', $old_uid, '=')
       ->fields('n', array('uid'))
       ->execute();
