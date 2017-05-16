@@ -1,22 +1,16 @@
 <?php
-
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Implements hook_menu().
  *
  * Adds the charting result page on each Webform node.
  */
 function oc_bookmarks_restore_menu() {
- $items['oc/bookmarks/restore/'] = array(
+ $items = array();
+ $items['oc/bookmarks/restore'] = array(
     'page callback' => 'oc_bookmarks_restore_run', // Render HTML
     'description' => 'Attempts to restore a users bookmarks after migrate to 5.5',
     'type' => MENU_CALLBACK,
-    'access arguments' => array('access content'),
+    'access arguments' => array('access content')
    );
   return $items;
 }
@@ -38,14 +32,14 @@ function oc_bookmarks_restore_run()
           {
               if($user->uid != $uid)
               {
-                 $num_updated += oc_bookmarks_update_bookmarks($uid,$user->uid);
+                 $num_updated += oc_bookmarks_restore_update_bookmarks($uid,$user->uid);
               }
           }
         }
         echo "Restored:" . $num_updated . " for:". $user->uid;
     }
 }
-function oc_bookmarks_update_bookmarks($old_uid,$new_uid)
+function oc_bookmarks_restore_update_bookmarks($old_uid,$new_uid)
 {
     $query = db_select('user', 'n')
       ->condition('n.uid', $old_uid, '=')
