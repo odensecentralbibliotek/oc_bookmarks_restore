@@ -7,38 +7,35 @@
 function oc_bookmarks_restore_menu() {
  $items = array();
  $items['oc/bookmarks/restore'] = array(
-    'page callback' => 'oc_bookmarks_restore_run', // Render HTML
+    'page callback' => 'oc_bookmarks_restore_user_login', // Render HTML
     'description' => 'Attempts to restore a users bookmarks after migrate to 5.5',
     'type' => MENU_CALLBACK,
     'access arguments' => array('access content')
    );
   return $items;
 }
-function oc_bookmarks_restore_run()
+function oc_bookmarks_restore_user_login($form,$form_state)
 {
     global $user;
-    if(isset($user->mail) && !empty($user->mail))
-    {
-        $query = new EntityFieldQuery();
-        $query->entityCondition('entity_type', 'user')
-        ->propertyCondition('mail', $user->mail);
+    $hash = hash('sha512', drupal_get_private_key() . $form_state['values']['name'], TRUE);
+    $auth_name_old = _password_base64_encode($hash, strlen($hash)) . '@ding_user';
+    $auth_name_old = substr($auth_name_old,0,35);
+    // Try to find the users uid based on the old hash value (length of the old
+  // hash should be 96).
+    $old_uid = db_select('authmap', 'a')
+    ->fields('a', array('uid'))
+    ->condition('authname', $auth_name_old."%","LIKE")
+    ->execute()
+    ->fetchField();
 
-        $result = $query->execute();
-        $num_updated = 0;
-        if (isset($result['user'])) {
-          $All_Users = array_keys($result['user']);
-          
-          foreach($All_Users as $uid)
-          {
-              echo "updating bookmarks:" . $uid . "<br/>";
-              if($user->uid != $uid)
-              {
-                  
-                 $num_updated += oc_bookmarks_restore_update_bookmarks($uid,$user->uid);
-              }
-          }
+    // Proceed only in the case it exists and needs to be updated.
+    if ($old_uid) {
+        $old_user = user_load($old_uid);
+        if($old_user->email == $user->email)
+        {
+            //update the bookmarks.
+            $count = oc_bookmarks_restore_update_bookmarks($old_uid,$user->uid);
         }
-        echo "Restored:" . $num_updated . " for:". $user->uid;
     }
 }
 function oc_bookmarks_restore_update_bookmarks($old_uid,$new_uid)
