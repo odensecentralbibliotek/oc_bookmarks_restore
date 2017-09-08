@@ -17,7 +17,7 @@ function oc_bookmarks_restore_menu() {
 function oc_bookmarks_restore_user_login($form,$form_state)
 {
     global $user;
-    $hash = hash('sha512', drupal_get_private_key() . $form_state['values']['name'], TRUE);
+    $hash = hash('sha512', drupal_get_private_key() . $form_state->name, TRUE);
     $auth_name_old = _password_base64_encode($hash, strlen($hash)) . '@ding_user';
     $auth_name_old = substr($auth_name_old,0,35);
     // Try to find the users uid based on the old hash value (length of the old
@@ -40,18 +40,25 @@ function oc_bookmarks_restore_user_login($form,$form_state)
 }
 function oc_bookmarks_restore_update_bookmarks($old_uid,$new_uid)
 {
-    $query = db_select('flag_content', 'n')
+    /*$query = db_select('flag_content', 'n')
       ->condition('n.uid', $old_uid, '=')
       ->fields('n', array('uid'))
       ->execute();
       return $num = $query->rowCount();
-    /*
-    $num_updated = db_update('flag_content')
-    ->fields(array(
-      'uid' => $new_uid,
-    ))
-    ->condition('uid',$old_uid, '=')
-    ->execute();
+    */
+     $num_updated  = 0;
+    try
+    {
+       $num_updated = db_update('flag_content')
+        ->fields(array(
+          'uid' => $new_uid,
+        ))
+        ->condition('uid',$old_uid, '=')
+        ->execute();
+    } catch (Exception $ex) {
+        watchdog_exception('bookmarks restore', "old id:" . $old_uid . "New id:" . $new_id);
+    }
+   
     
-    return $num_updated;*/
+    return $num_updated;
 }
