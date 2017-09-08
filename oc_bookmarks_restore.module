@@ -17,14 +17,13 @@ function oc_bookmarks_restore_menu() {
 function oc_bookmarks_restore_user_login($form,$form_state)
 {
     global $user;
-    $hash = hash('sha512', drupal_get_private_key() . $form_state->name, TRUE);
-    $auth_name_old = _password_base64_encode($hash, strlen($hash)) . '@ding_user';
-    $auth_name_old = substr($auth_name_old,0,35);
+    $auth_name_old = substr($form_state->init,0,35);
     // Try to find the users uid based on the old hash value (length of the old
   // hash should be 96).
     $old_uid = db_select('authmap', 'a')
     ->fields('a', array('uid'))
     ->condition('authname', $auth_name_old."%","LIKE")
+    ->condition('uid', $user->uid, '!=')
     ->execute()
     ->fetchField();
 
@@ -40,7 +39,8 @@ function oc_bookmarks_restore_user_login($form,$form_state)
 }
 function oc_bookmarks_restore_update_bookmarks($old_uid,$new_uid)
 {
-    /*$query = db_select('flag_content', 'n')
+  /*
+    $query = db_select('flag_content', 'n')
       ->condition('n.uid', $old_uid, '=')
       ->fields('n', array('uid'))
       ->execute();
