@@ -56,7 +56,7 @@ function oc_bookmarks_restore_update_bookmarks($old_uid,$new_uid)
         ->condition('uid',$old_uid, '=')
         ->execute();
     } catch (Exception $ex) {
-        watchdog_exception('bookmarks restore', "old id:" . $old_uid . "New id:" . $new_id);
+        watchdog_exception('bookmarks restore', $ex,"old id:" . $old_uid . "New id:" . $new_id);
     }
    
     
